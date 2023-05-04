@@ -467,7 +467,7 @@ void LoggedTopics::add_mission_topic(const char *name, uint16_t interval_ms)
 bool LoggedTopics::add_topic(const orb_metadata *topic, uint16_t interval_ms, uint8_t instance, bool optional)
 {
 	if (_subscriptions.count >= MAX_TOPICS_NUM) {
-		PX4_WARN("Too many subscriptions, failed to add: %s %" PRIu8, topic->o_name, instance);
+		PX4_DEBUG("Too many subscriptions, failed to add: %s %" PRIu8, topic->o_name, instance);
 		return false;
 	}
 
