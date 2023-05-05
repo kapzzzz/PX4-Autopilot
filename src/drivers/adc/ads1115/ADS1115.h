@@ -93,6 +93,9 @@
 #define CONFIG_LOW_COMP_QU_AFTER4    0x02
 #define CONFIG_LOW_COMP_QU_DISABLE    0x03
 
+#define CONFIG_RESET_VALUE_HIGH 0x85
+#define CONFIG_RESET_VALUE_LOW 0x83
+
 using namespace time_literals;
 
 /*
@@ -113,6 +116,8 @@ public:
 	static void print_usage();
 
 	void RunImpl();
+
+	int probe() override;
 
 protected:
 

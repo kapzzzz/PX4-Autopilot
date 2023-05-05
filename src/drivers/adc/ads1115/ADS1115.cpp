@@ -61,6 +61,23 @@ int ADS1115::init()
 	return PX4_OK;
 }
 
+int ADS1115::probe() {
+	uint8_t buf[2] = {};
+	int ret = readReg(ADDRESSPOINTER_REG_CONFIG, buf, 2);
+
+	if (ret != PX4_OK) {
+		DEVICE_DEBUG("readReg failed (%i)", ret);
+		return ret;
+	}
+
+	if (buf[0] != CONFIG_RESET_VALUE_LOW || buf[1] != CONFIG_RESET_VALUE_HIGH) {
+		DEVICE_DEBUG("ADS1115 not found");
+		return PX4_ERROR;
+	}
+
+	return PX4_OK;
+}
+
 int ADS1115::setChannel(ADS1115::ChannelSelection ch)
 {
 	uint8_t buf[2] = {};
