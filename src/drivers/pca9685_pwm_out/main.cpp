@@ -91,7 +91,7 @@ private:
 	// used to compare and cancel unecessary scheduling changes caused by parameter update
 	int32_t _last_fetched_Freq = -1;
 	// If this value is above zero, then change freq and scheduling in running state.
-	float _targetFreq = -1.0f;
+	float _targetFreq = 50.0f;
 
 
 	void Run() override;

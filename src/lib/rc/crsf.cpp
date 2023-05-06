@@ -55,7 +55,7 @@
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
 
-#define CRSF_BAUDRATE 420000
+#define CRSF_BAUDRATE 460800
 
 #define CRSF_SYNC_BYTE 0xC8
 
