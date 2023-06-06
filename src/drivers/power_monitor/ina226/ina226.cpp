@@ -113,7 +113,7 @@ int INA226::read(uint8_t address, int16_t &data)
 
 		} else {
 			perf_count(_comms_errors);
-			PX4_DEBUG("i2c::transfer returned %d", ret);
+			PX4_INFO("i2c::transfer returned %d", ret);
 		}
 	}
 
@@ -175,13 +175,15 @@ INA226::probe()
 {
 	int16_t value{0};
 
-	if (read(INA226_MFG_ID, value) != PX4_OK || value != INA226_MFG_ID_TI) {
-		PX4_DEBUG("probe mfgid %d", value);
+	// if (read(INA226_MFG_ID, value) != PX4_OK || value != INA226_MFG_ID_TI) {
+	if (read(INA226_MFG_ID, value) != PX4_OK) {
+		PX4_INFO("probe mfgid %d", value);
 		return -1;
 	}
 
-	if (read(INA226_MFG_DIEID, value) != PX4_OK || value != INA226_MFG_DIE) {
-		PX4_DEBUG("probe die id %d", value);
+	// if (read(INA226_MFG_DIEID, value) != PX4_OK || value != INA226_MFG_DIE) {
+	if (read(INA226_MFG_DIEID, value) != PX4_OK) {
+		PX4_INFO("probe die id %d", value);
 		return -1;
 	}
 
@@ -198,7 +200,7 @@ INA226::measure()
 
 		if (ret < 0) {
 			perf_count(_comms_errors);
-			PX4_DEBUG("i2c::transfer returned %d", ret);
+			PX4_INFO("i2c::transfer returned %d", ret);
 		}
 	}
 
@@ -227,7 +229,7 @@ INA226::collect()
 	// success = success && (read(INA226_REG_SHUNTVOLTAGE, _shunt) == PX4_OK);
 
 	if (!success) {
-		PX4_DEBUG("error reading from sensor");
+		PX4_INFO("error reading from sensor");
 		_bus_voltage = _power = _current = _shunt = 0;
 	}
 

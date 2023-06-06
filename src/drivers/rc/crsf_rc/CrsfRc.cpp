@@ -46,7 +46,7 @@
 
 using namespace time_literals;
 
-#define CRSF_BAUDRATE 420000
+#define CRSF_BAUDRATE 460800
 
 CrsfRc::CrsfRc(const char *device) :
 	ModuleParams(nullptr),
