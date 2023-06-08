@@ -1918,7 +1918,7 @@ Mavlink::task_main(int argc, char *argv[])
 				err_flag = true;
 			}
 
-			if (_baudrate < 9600 || _baudrate > 3000000) {
+			if (_baudrate < 1200 || _baudrate > 3000000) {
 				PX4_ERR("invalid baud rate '%s'", myoptarg);
 				err_flag = true;
 			}
