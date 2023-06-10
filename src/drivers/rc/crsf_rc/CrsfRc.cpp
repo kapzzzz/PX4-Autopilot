@@ -222,7 +222,7 @@ void CrsfRc::Run()
 		}
 
 		if (_param_rc_crsf_tel_en.get() && !_is_singlewire
-		    && (_input_rc.timestamp > _telemetry_update_last + 100_ms)) {
+		    && (_input_rc.timestamp > _telemetry_update_last + 20_ms)) {
 			switch (_next_type) {
 			case 0:
 				battery_status_s battery_status;
@@ -328,6 +328,29 @@ void CrsfRc::Run()
 					this->SendTelemetryFlightMode(flight_mode);
 				}
 
+				break;
+
+			case 4:
+				vehicle_air_data_s airdata;
+
+				if (_vehicle_air_data_sub.update(&airdata)) {
+
+					if (isnan(filtered_alt)) {
+						filtered_alt = airdata.baro_alt_meter;
+					} else {
+						filtered_alt = .2f * airdata.baro_alt_meter + .8f * filtered_alt;
+					}
+
+					/* estimate vertical speed using first difference and delta t */
+					uint32_t dt = _input_rc.timestamp - lastVSPD_ms;
+					float speed  = (filtered_alt - last_baro_alt) / (1e-8f * (float)dt);
+
+					/* save current alt and timestamp */
+					last_baro_alt = filtered_alt;
+					lastVSPD_ms = _input_rc.timestamp;
+
+					this->SendTelemetryVerticalSpeed(static_cast<int16_t>(speed));
+				}
 				break;
 			}
 
@@ -460,6 +483,16 @@ bool CrsfRc::SendTelemetryAttitude(const int16_t pitch, const int16_t roll, cons
 	write_uint16_t(buf, offset, pitch);
 	write_uint16_t(buf, offset, roll);
 	write_uint16_t(buf, offset, yaw);
+	WriteFrameCrc(buf, offset, sizeof(buf));
+	return write(_rc_fd, buf, offset) == offset;
+}
+
+bool CrsfRc::SendTelemetryVerticalSpeed(const int16_t speed)
+{
+	uint8_t buf[(uint8_t)crsf_payload_size_t::vertical_speed + 4];
+	int offset = 0;
+	WriteFrameHeader(buf, offset, crsf_frame_type_t::vertical_speed, (uint8_t)crsf_payload_size_t::vertical_speed);
+	write_uint16_t(buf, offset, speed);
 	WriteFrameCrc(buf, offset, sizeof(buf));
 	return write(_rc_fd, buf, offset) == offset;
 }

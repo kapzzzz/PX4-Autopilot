@@ -52,6 +52,8 @@
 #include <uORB/topics/vehicle_attitude.h>
 #include <uORB/topics/sensor_gps.h>
 #include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_air_data.h>
+
 
 class CrsfRc : public ModuleBase<CrsfRc>, public ModuleParams, public px4::ScheduledWorkItem
 {
@@ -87,6 +89,8 @@ private:
 
 	bool SendTelemetryFlightMode(const char *flight_mode);
 
+	bool SendTelemetryVerticalSpeed(const int16_t speed);
+
 	int _rc_fd{-1};
 	char _device[20] {}; ///< device / serial port path
 	bool _is_singlewire{false};
@@ -95,18 +99,23 @@ private:
 	uint8_t _rcs_buf[RC_MAX_BUFFER_SIZE] {};
 	uint32_t _bytes_rx{0};
 
+	float filtered_alt {NAN};
+	float last_baro_alt {0.f};
+	hrt_abstime lastVSPD_ms {0};
+
 	hrt_abstime _last_packet_seen{0};
 
 	CrsfParserStatistics_t _packet_parser_statistics{0};
 
 	// telemetry
 	hrt_abstime _telemetry_update_last{0};
-	static constexpr int num_data_types{4}; ///< number of different telemetry data types
+	static constexpr int num_data_types{5}; ///< number of different telemetry data types
 	int _next_type{0};
 	uORB::Subscription _battery_status_sub{ORB_ID(battery_status)};
 	uORB::Subscription _vehicle_attitude_sub{ORB_ID(vehicle_attitude)};
 	uORB::Subscription _vehicle_gps_position_sub{ORB_ID(vehicle_gps_position)};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
+	uORB::Subscription _vehicle_air_data_sub{ORB_ID(vehicle_air_data)};
 
 	enum class crsf_frame_type_t : uint8_t {
 		gps = 0x02,
@@ -115,6 +124,7 @@ private:
 		rc_channels_packed = 0x16,
 		attitude = 0x1E,
 		flight_mode = 0x21,
+		vertical_speed = 0x07,
 
 		// Extended Header Frames, range: 0x28 to 0x96
 		device_ping = 0x28,
@@ -131,6 +141,8 @@ private:
 		link_statistics = 10,
 		rc_channels = 22, ///< 11 bits per channel * 16 channels = 22 bytes.
 		attitude = 6,
+		vertical_speed = 2
+
 	};
 
 	void WriteFrameHeader(uint8_t *buf, int &offset, const crsf_frame_type_t type, const uint8_t payload_size);
